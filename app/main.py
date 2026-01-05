@@ -6,22 +6,25 @@ def move_file(command: str) -> None:
     if len(parts) != 3 or parts[0] != "mv":
         raise ValueError("Invalid command format. "
                          "Use: mv <source> <destination>")
-    source_path = parts[1]
-    dest_path = parts[2]
+    _, source_path, dest_path = parts
     if dest_path.endswith("/"):
         filename = os.path.basename(source_path)
         dest_path = os.path.join(dest_path, filename)
     dest_dir = os.path.dirname(dest_path)
     if dest_dir:
-        path_parts = dest_dir.split("/")
+        norm_dest_dir = os.path.normpath(dest_dir)
+        path_parts = norm_dest_dir.split(os.sep)
         current_path = ""
         for part in path_parts:
             if not part:
+                if not current_path and dest_dir.startswith(os.sep):
+                    current_path = os.sep
                 continue
-            if current_path:
+            if current_path and current_path != os.sep:
                 current_path = os.path.join(current_path, part)
             else:
-                current_path = part
+                current_path = os.path.join(current_path, part) \
+                    if current_path else part
             if not os.path.exists(current_path):
                 os.mkdir(current_path)
     try:
