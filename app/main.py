@@ -12,21 +12,7 @@ def move_file(command: str) -> None:
         dest_path = os.path.join(dest_path, filename)
     dest_dir = os.path.dirname(dest_path)
     if dest_dir:
-        norm_dest_dir = os.path.normpath(dest_dir)
-        path_parts = norm_dest_dir.split(os.sep)
-        current_path = ""
-        for part in path_parts:
-            if not part:
-                if not current_path and dest_dir.startswith(os.sep):
-                    current_path = os.sep
-                continue
-            if current_path and current_path != os.sep:
-                current_path = os.path.join(current_path, part)
-            else:
-                current_path = os.path.join(current_path, part) \
-                    if current_path else part
-            if not os.path.exists(current_path):
-                os.mkdir(current_path)
+        os.makedirs(dest_dir, exist_ok=True)
     try:
         with open(source_path, "r") as f_src:
             content = f_src.read()
@@ -35,5 +21,8 @@ def move_file(command: str) -> None:
         os.remove(source_path)
     except FileNotFoundError:
         print(f"Error: Source file '{source_path}' not found.")
+    except PermissionError:
+        print(f"Error: Permission denied accessing "
+              f"'{source_path}' or '{dest_path}'.")
     except Exception as e:
         print(f"An error occurred: {e}")
